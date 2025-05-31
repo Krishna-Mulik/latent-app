@@ -34,5 +34,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git@work.github.com:Krishna-Mulik/latent-app.git"
+  }
 }
