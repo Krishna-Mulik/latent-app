@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3"
   },
@@ -20,7 +21,9 @@
   "dependencies": {
     "@types/authenticator": "^1.1.4",
     "@types/express": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
     "authenticator": "^1.1.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2"
   }
 }
