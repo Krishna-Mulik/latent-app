@@ -3,27 +3,32 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -b",
-    "start": "node dist/index.js",
-    "dev": "npm run build && npm run start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "corss-env NODE_ENV=production node dist/index.js",
+    "dev": "npm run build && cross-env NODE_ENV=dev node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node src/index.ts"
   },
   "devDependencies": {
     "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.15.3"
+    "@types/authenticator": "^1.1.4",
+    "@types/express": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.15.3",
+    "@types/nodemailer": "^6.4.17",
+    "cross-env": "^7.0.3",
+    "tsup": "^8.5.0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "description": "",
   "dependencies": {
-    "@types/authenticator": "^1.1.4",
-    "@types/express": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.9",
     "authenticator": "^1.1.5",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.3"
   }
 }

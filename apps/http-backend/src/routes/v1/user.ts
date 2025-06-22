@@ -1,17 +1,18 @@
-import express, { Router } from "express";
-import authenticator, { verifyToken } from "authenticator";
-import client from "@repo/db/client";
+import { PrismaClient } from "@repo/db/client";
+import { Router } from "express";
 import jwt from "jsonwebtoken";
 import { JWt_PASSWORD } from "../../config";
+import { getToken, verifyToken } from "../../utils/totp";
 
-const router: Router = express.Router();
+const router: Router = Router();
+const client = new PrismaClient();
 
-router.post('/signup', (req, res) => {
-    const number = req.body.phoneNumber;
+router.post('/signup', async (req, res) => {
+    const number = String(req.body.phoneNumber);
 
-    const totp = authenticator.generateToken(number + "SignUP");
+    const totp = getToken(number, 'AUTH');
 
-    const user = client.user.upsert({
+    const user = await client.user.upsert({
         where: {
             number
         },
@@ -22,14 +23,19 @@ router.post('/signup', (req, res) => {
         update: {}
     })
 
-    res.json({ "otp": totp, "id": 2 });
+    // sendEmail("krishmulik22@gmail.com", `your otp is ${totp}`)
+
+    console.log(user);
+
+    res.json({ "otp": totp, "id": user.id });
 });
 
-router.post('/signup/verify', (req, res) => {
-    const number = req.body.phoneNumber;
+router.post('/signup/verify', async (req, res) => {
+    const number = String(req.body.phoneNumber);
     const name = req.body.name;
+    const otp = req.body.otp;
 
-    if (!verifyToken(number + "SignUP", req.body.otp)) {
+    if (process.env.NODE_ENV === "production" && !verifyToken(number, "AUTH", otp)) {
         res.status(401).json({
             "message": "Invalid Token"
         })
@@ -37,7 +43,7 @@ router.post('/signup/verify', (req, res) => {
         return;
     }
 
-    const userId = client.user.update({
+    const user = await client.user.update({
         where: {
             number
         },
@@ -48,11 +54,64 @@ router.post('/signup/verify', (req, res) => {
     })
 
     const jwtToken = jwt.sign({
-        userId
+        userId: user.id
     }, JWt_PASSWORD);
 
     res.json({
-        jwtToken
+        "token": jwtToken
+    });
+});
+
+router.post('/signin', async (req, res) => {
+    const number = String(req.body.phoneNumber);
+
+    try {
+
+        const user = await client.user.findFirstOrThrow({
+            where: {
+                number
+            }
+        })
+
+        const totp = getToken(number, "AUTH");
+        // sendEmail("krishmulik22@gmail.com", `your otp is ${totp}`)
+
+        res.json({
+            "otp": totp,
+            "id": 2,
+            "message": "otp send"
+        });
+    } catch (e) {
+        res.status(404).json({
+            message: "User does not exists"
+        })
+    }
+});
+
+router.post('/signin/verify', async (req, res) => {
+    const number = req.body.phoneNumber;
+    const otp = req.body.otp;
+
+    if (process.env.NODE_ENV === "production" && !verifyToken(number, "AUTH", otp)) {
+        res.status(401).json({
+            "message": "Invalid Token"
+        })
+
+        return;
+    }
+
+    const user = await client.user.findFirstOrThrow({
+        where: {
+            number
+        }
+    })
+
+    const jwtToken = jwt.sign({
+        userId: user.id
+    }, JWt_PASSWORD);
+
+    res.json({
+        "token": jwtToken
     });
 });
 
